@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Capital Game Deluxe V2</title>
+  <style>
+    :root{
+      --bg1:#0b1220;
+      --bg2:#143a7b;
+      --bg3:#2f74ff;
+      --panel:#111827cc;
+      --panel-2:#223154;
+      --text:#f8fafc;
+      --muted:#cbd5e1;
+      --accent:#f59e0b;
+      --good:#22c55e;
+      --bad:#ef4444;
+      --btn:#e5e7eb;
+      --btntext:#111827;
+      --track:#32425f;
+      --shadow:0 12px 30px rgba(0,0,0,.28);
+      --radius:22px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at left center, #3aa9d9 0%, transparent 22%),
+        radial-gradient(circle at right top, #4b5cff 0%, transparent 28%),
+        linear-gradient(135deg, var(--bg1), #0a1c47 55%, #0d2f69 100%);
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:20px;
+    }
+
+    .wrap{
+      width:min(1100px, 96vw);
+      background:linear-gradient(135deg, rgba(17,24,39,.94), rgba(19,46,99,.92));
+      border-radius:26px;
+      box-shadow:var(--shadow);
+      padding:28px 28px 34px;
+      min-height:680px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .title{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:14px;
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight:800;
+      text-align:center;
+      margin:6px 0 18px;
+    }
+
+    .globe{
+      display:inline-block;
+      font-size:1em;
+      line-height:1;
+      animation: spin 8s linear infinite;
+      transform-origin:center center;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,.35));
+    }
+
+    @keyframes spin{
+      from{ transform:rotate(0deg); }
+      to{ transform:rotate(360deg); }
+    }
+
+    .controls{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:10px;
+      margin-bottom:14px;
+    }
+
+    select, .start-btn, .play-again{
+      border:none;
+      border-radius:12px;
+      padding:14px 16px;
+      font-size:18px;
+      box-shadow: var(--shadow);
+    }
+
+    select{
+      min-width:190px;
+      color:#111827;
+      background:white;
+    }
+
+    .start-btn, .play-again{
+      background:var(--accent);
+      color:#111827;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .hud{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:12px;
+      margin:10px 0 8px;
+    }
+
+    .hud-card{
+      background:rgba(53, 69, 106, .72);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:16px;
+      padding:12px 10px;
+      text-align:center;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+    }
+
+    .hud-label{
+      color:var(--muted);
+      font-size:16px;
+      margin-bottom:4px;
+    }
+
+    .hud-value{
+      font-size:24px;
+      font-weight:800;
+    }
+
+    .progress-track{
+      height:16px;
+      width:100%;
+      background:var(--track);
+      border-radius:999px;
+      overflow:hidden;
+      margin:10px 0 30px;
+    }
+
+    .progress-bar{
+      height:100%;
+      width:100%;
+      background:linear-gradient(90deg, #22c55e 0%, #eab308 45%, #f97316 72%, #ef4444 100%);
+      transform-origin:left center;
+      transition: width .25s linear;
+    }
+
+    .game-area{
+      text-align:center;
+      margin-top:12px;
+    }
+
+    .prompt{
+      color:var(--muted);
+      font-size:18px;
+      margin-bottom:12px;
+      font-weight:700;
+    }
+
+    .country{
+      font-size: clamp(34px, 6vw, 68px);
+      font-weight:900;
+      margin-bottom:28px;
+      line-height:1.05;
+    }
+
+    .answers{
+      display:grid;
+      grid-template-columns: repeat(5, minmax(120px, 1fr));
+      gap:14px;
+      max-width:900px;
+      margin:0 auto 18px;
+    }
+
+    .answer-btn{
+      border:none;
+      border-radius:14px;
+      background:var(--btn);
+      color:var(--btntext);
+      padding:17px 10px;
+      font-size:18px;
+      font-weight:800;
+      cursor:pointer;
+      transition:transform .12s ease, background .12s ease, box-shadow .12s ease, opacity .12s ease;
+      box-shadow:0 8px 16px rgba(0,0,0,.18);
+    }
+
+    .answer-btn:hover{ transform:translateY(-1px); }
+    .answer-btn:disabled{ cursor:not-allowed; opacity:.88; }
+    .answer-btn.correct{ background:var(--good); color:white; }
+    .answer-btn.wrong{ background:var(--bad); color:white; }
+    .answer-btn.none-btn{ background:#d1d5db; }
+
+    .feedback{
+      min-height:28px;
+      font-size:20px;
+      font-weight:800;
+      margin-top:8px;
+    }
+
+    .feedback.good{ color:#86efac; }
+    .feedback.bad{ color:#fca5a5; }
+
+    .end-screen{
+      text-align:center;
+      padding:26px 8px 8px;
+      display:none;
+    }
+
+    .end-title{
+      font-size: clamp(40px, 5vw, 64px);
+      font-weight:900;
+      margin:6px 0 10px;
+    }
+
+    .final-label{
+      color:var(--muted);
+      margin-top:4px;
+      font-size:18px;
+    }
+
+    .final-score{
+      font-size:72px;
+      font-weight:900;
+      margin:10px 0 8px;
+    }
+
+    .summary{
+      color:var(--text);
+      font-size:20px;
+      margin-bottom:18px;
+      font-weight:700;
+    }
+
+    .muted-note{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:16px;
+    }
+
+    .hidden{ display:none !important; }
+
+    @media (max-width: 900px){
+      .answers{
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+      }
+      .hud{
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 560px){
+      .wrap{ padding:18px 14px 24px; min-height:auto; }
+      .controls{ flex-direction:column; align-items:center; }
+      select, .start-btn, .play-again{ width:100%; max-width:340px; }
+      .answers{ grid-template-columns: 1fr; }
+      .hud{ grid-template-columns: 1fr 1fr; gap:10px; }
+      .hud-value{ font-size:22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="title"><span class="globe">🌍</span><span>World Capital Game</span></div>
+
+    <div id="startArea">
+      <div class="controls">
+        <select id="modeSelect">
+          <option value="mixed" selected>Mixed Mode</option>
+          <option value="normal">Normal Mode</option>
+          <option value="trick">Trick Mode</option>
+        </select>
+
+        <select id="timerSelect">
+          <option value="10">10 Second Timer</option>
+          <option value="8" selected>8 Second Timer</option>
+          <option value="6">6 Second Timer</option>
+        </select>
+
+        <button class="start-btn" id="startBtn">Start Game</button>
+      </div>
+
+      <div class="hud">
+        <div class="hud-card"><div class="hud-label">Score</div><div class="hud-value" id="score">0</div></div>
+        <div class="hud-card"><div class="hud-label">Right</div><div class="hud-value" id="right">0</div></div>
+        <div class="hud-card"><div class="hud-label">Wrong</div><div class="hud-value" id="wrong">0</div></div>
+        <div class="hud-card"><div class="hud-label">Timer</div><div class="hud-value" id="timer">0</div></div>
+      </div>
+
+      <div class="progress-track">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <div class="game-area" id="gameArea">
+        <div class="prompt">Press Start Game</div>
+        <div class="country" id="countryText">Ready?</div>
+        <div class="answers hidden" id="answers"></div>
+        <div class="feedback" id="feedback"></div>
+        <div class="muted-note">Mixed Mode = some rounds include the correct capital, some require <b>NONE</b>.</div>
+      </div>
+    </div>
+
+    <div class="end-screen" id="endScreen">
+      <div class="end-title">Game Over</div>
+      <div class="final-label">Final Score</div>
+      <div class="final-score" id="finalScore">0</div>
+      <div class="summary">✅ Right: <span id="finalRight">0</span> &nbsp;&nbsp; ❌ Wrong: <span id="finalWrong">0</span></div>
+      <button class="play-again" id="playAgainBtn">Play Again</button>
+    </div>
+  </div>
+
+  <script>
+    const data = [
+      { country: "Afghanistan", capital: "Kabul" },
+      { country: "Argentina", capital: "Buenos Aires" },
+      { country: "Australia", capital: "Canberra" },
+      { country: "Austria", capital: "Vienna" },
+      { country: "Belgium", capital: "Brussels" },
+      { country: "Brazil", capital: "Brasilia" },
+      { country: "Canada", capital: "Ottawa" },
+      { country: "Chile", capital: "Santiago" },
+      { country: "China", capital: "Beijing" },
+      { country: "Colombia", capital: "Bogota" },
+      { country: "Cuba", capital: "Havana" },
+      { country: "Denmark", capital: "Copenhagen" },
+      { country: "Egypt", capital: "Cairo" },
+      { country: "Finland", capital: "Helsinki" },
+      { country: "France", capital: "Paris" },
+      { country: "Germany", capital: "Berlin" },
+      { country: "Greece", capital: "Athens" },
+      { country: "Hungary", capital: "Budapest" },
+      { country: "Iceland", capital: "Reykjavik" },
+      { country: "India", capital: "New Delhi" },
+      { country: "Indonesia", capital: "Jakarta" },
+      { country: "Ireland", capital: "Dublin" },
+      { country: "Italy", capital: "Rome" },
+      { country: "Japan", capital: "Tokyo" },
+      { country: "Kenya", capital: "Nairobi" },
+      { country: "Mexico", capital: "Mexico City" },
+      { country: "Morocco", capital: "Rabat" },
+      { country: "Netherlands", capital: "Amsterdam" },
+      { country: "New Zealand", capital: "Wellington" },
+      { country: "Nigeria", capital: "Abuja" },
+      { country: "Norway", capital: "Oslo" },
+      { country: "Peru", capital: "Lima" },
+      { country: "Poland", capital: "Warsaw" },
+      { country: "Portugal", capital: "Lisbon" },
+      { country: "Romania", capital: "Bucharest" },
+      { country: "Russia", capital: "Moscow" },
+      { country: "Saudi Arabia", capital: "Riyadh" },
+      { country: "South Africa", capital: "Pretoria" },
+      { country: "South Korea", capital: "Seoul" },
+      { country: "Spain", capital: "Madrid" },
+      { country: "Sweden", capital: "Stockholm" },
+      { country: "Switzerland", capital: "Bern" },
+      { country: "Thailand", capital: "Bangkok" },
+      { country: "Turkey", capital: "Ankara" },
+      { country: "Ukraine", capital: "Kyiv" },
+      { country: "United Kingdom", capital: "London" },
+      { country: "United States", capital: "Washington, D.C." },
+      { country: "Venezuela", capital: "Caracas" },
+      { country: "Vietnam", capital: "Hanoi" }
+    ];
+
+    const scoreEl = document.getElementById('score');
+    const rightEl = document.getElementById('right');
+    const wrongEl = document.getElementById('wrong');
+    const timerEl = document.getElementById('timer');
+    const progressBar = document.getElementById('progressBar');
+    const countryText = document.getElementById('countryText');
+    const answersEl = document.getElementById('answers');
+    const feedbackEl = document.getElementById('feedback');
+    const endScreen = document.getElementById('endScreen');
+    const startArea = document.getElementById('startArea');
+    const finalScoreEl = document.getElementById('finalScore');
+    const finalRightEl = document.getElementById('finalRight');
+    const finalWrongEl = document.getElementById('finalWrong');
+    const startBtn = document.getElementById('startBtn');
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const modeSelect = document.getElementById('modeSelect');
+    const timerSelect = document.getElementById('timerSelect');
+
+    let deck = [];
+    let current = 0;
+    let score = 0;
+    let right = 0;
+    let wrong = 0;
+    let timerSeconds = 8;
+    let timeLeft = 8;
+    let timer = null;
+    let locked = false;
+    let correctAnswer = '';
+    let mode = 'mixed';
+    const maxQuestions = 20;
+
+    function shuffle(arr){
+      return [...arr].sort(() => Math.random() - 0.5);
+    }
+
+    function updateHUD(){
+      scoreEl.textContent = score;
+      rightEl.textContent = right;
+      wrongEl.textContent = wrong;
+      timerEl.textContent = timeLeft;
+      const pct = (timeLeft / timerSeconds) * 100;
+      progressBar.style.width = pct + '%';
+    }
+
+    function setFeedback(text='', type=''){
+      feedbackEl.textContent = text;
+      feedbackEl.className = 'feedback';
+      if(type) feedbackEl.classList.add(type);
+    }
+
+    function buildOptions(item){
+      const allCapitals = data.map(d => d.capital).filter(c => c !== item.capital);
+      const wrongChoices = shuffle(allCapitals).slice(0, 4);
+      let options = [];
+      const chosenMode = mode === 'mixed'
+        ? (Math.random() < 0.5 ? 'normal' : 'trick')
+        : mode;
+
+      if(chosenMode === 'normal'){
+        correctAnswer = item.capital;
+        const threeWrong = wrongChoices.slice(0, 3);
+        options = shuffle([item.capital, ...threeWrong, 'NONE']);
+      } else {
+        const includeCorrect = Math.random() < 0.4; // still allow some surprise
+        if(includeCorrect){
+          correctAnswer = item.capital;
+          const threeWrong = wrongChoices.slice(0, 3);
+          options = shuffle([item.capital, ...threeWrong, 'NONE']);
+        } else {
+          correctAnswer = 'NONE';
+          options = shuffle([...wrongChoices, 'NONE']);
+        }
+      }
+      return options;
+    }
+
+    function renderQuestion(){
+      if(current >= Math.min(maxQuestions, deck.length)){
+        endGame();
+        return;
+      }
+
+      const item = deck[current];
+      countryText.textContent = item.country;
+      answersEl.innerHTML = '';
+      answersEl.classList.remove('hidden');
+      setFeedback('', '');
+      locked = false;
+
+      const options = buildOptions(item);
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'answer-btn' + (opt === 'NONE' ? ' none-btn' : '');
+        btn.textContent = opt;
+        btn.onclick = () => answer(opt, btn);
+        answersEl.appendChild(btn);
+      });
+
+      timeLeft = timerSeconds;
+      updateHUD();
+      startTimer();
+    }
+
+    function startTimer(){
+      clearInterval(timer);
+      timer = setInterval(() => {
+        timeLeft--;
+        updateHUD();
+        if(timeLeft <= 0){
+          clearInterval(timer);
+          if(!locked){
+            locked = true;
+            wrong++;
+            setFeedback(`Time's up! Correct answer: ${correctAnswer}`, 'bad');
+            disableButtons();
+            setTimeout(nextQuestion, 900);
+          }
+        }
+      }, 1000);
+    }
+
+    function disableButtons(){
+      [...answersEl.querySelectorAll('button')].forEach(b => b.disabled = true);
+    }
+
+    function highlightAnswers(selectedText){
+      [...answersEl.querySelectorAll('button')].forEach(btn => {
+        const txt = btn.textContent;
+        if(txt === correctAnswer){
+          btn.classList.add('correct');
+        }
+        if(txt === selectedText && txt !== correctAnswer){
+          btn.classList.add('wrong');
+        }
+      });
+    }
+
+    function answer(choice, btn){
+      if(locked) return;
+      locked = true;
+      clearInterval(timer);
+
+      if(choice === correctAnswer){
+        score += 10;
+        right++;
+        setFeedback('Correct!', 'good');
+      } else {
+        wrong++;
+        setFeedback(`Wrong! Correct answer: ${correctAnswer}`, 'bad');
+      }
+
+      highlightAnswers(choice);
+      disableButtons();
+      updateHUD();
+      setTimeout(nextQuestion, 850);
+    }
+
+    function nextQuestion(){
+      current++;
+      renderQuestion();
+    }
+
+    function endGame(){
+      clearInterval(timer);
+      startArea.classList.add('hidden');
+      endScreen.style.display = 'block';
+      finalScoreEl.textContent = score;
+      finalRightEl.textContent = right;
+      finalWrongEl.textContent = wrong;
+    }
+
+    function startGame(){
+      deck = shuffle(data);
+      current = 0;
+      score = 0;
+      right = 0;
+      wrong = 0;
+      mode = modeSelect.value;
+      timerSeconds = Number(timerSelect.value);
+      timeLeft = timerSeconds;
+      startArea.classList.remove('hidden');
+      endScreen.style.display = 'none';
+      updateHUD();
+      renderQuestion();
+    }
+
+    startBtn.addEventListener('click', startGame);
+    playAgainBtn.addEventListener('click', startGame);
+    updateHUD();
+  </script>
+</body>
+</html>
