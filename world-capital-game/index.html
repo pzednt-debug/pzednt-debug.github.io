@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>World Capital Game Deluxe</title>
+<style>
+  :root{
+    --bg1:#0f172a;
+    --bg2:#1d4ed8;
+    --bg3:#0f766e;
+    --panel:#111827cc;
+    --text:#f8fafc;
+    --muted:#cbd5e1;
+    --accent:#f59e0b;
+    --good:#16a34a;
+    --bad:#dc2626;
+    --btn:#e5e7eb;
+    --btntext:#111827;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:Arial, Helvetica, sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at top left, #38bdf8 0%, transparent 28%),
+      radial-gradient(circle at top right, #8b5cf6 0%, transparent 24%),
+      radial-gradient(circle at bottom left, #22c55e 0%, transparent 24%),
+      linear-gradient(135deg, var(--bg1), var(--bg2) 50%, var(--bg3));
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding:24px;
+  }
+  .wrap{
+    width:min(980px, 100%);
+    background:var(--panel);
+    backdrop-filter: blur(10px);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:24px;
+    padding:28px 22px 32px;
+    box-shadow:0 18px 60px rgba(0,0,0,.35);
+  }
+  h1{
+    margin:0 0 18px;
+    text-align:center;
+    font-size:clamp(2rem, 4vw, 3.4rem);
+  }
+  .topbar{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    justify-content:center;
+    align-items:center;
+    margin-bottom:18px;
+  }
+  select, button, input{
+    font-size:1.05rem;
+    border-radius:12px;
+    border:none;
+  }
+  select, input{
+    padding:12px 14px;
+  }
+  button{
+    padding:12px 22px;
+    cursor:pointer;
+    font-weight:700;
+    transition:transform .08s ease, opacity .2s ease, background .2s ease;
+  }
+  button:hover{transform:translateY(-1px)}
+  .primary{
+    background:var(--accent);
+    color:#111827;
+  }
+  .option{
+    background:var(--btn);
+    color:var(--btntext);
+    min-width:180px;
+  }
+  .hud{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:12px;
+    margin:14px 0 10px;
+  }
+  .card{
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:16px;
+    padding:12px;
+    text-align:center;
+  }
+  .label{font-size:.9rem; color:var(--muted)}
+  .value{font-size:1.5rem; font-weight:700; margin-top:4px}
+  .questionBox{
+    text-align:center;
+    padding:22px 10px 8px;
+  }
+  .prompt{
+    color:var(--muted);
+    font-size:1rem;
+    margin-bottom:8px;
+  }
+  .question{
+    font-size:clamp(2rem, 4vw, 3.2rem);
+    font-weight:800;
+    margin-bottom:22px;
+  }
+  .answers{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:16px;
+    margin:10px 0 18px;
+  }
+  .typing{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin:8px 0 18px;
+  }
+  .typing input{
+    width:min(420px, 80vw);
+  }
+  .feedback{
+    min-height:40px;
+    text-align:center;
+    font-weight:700;
+    font-size:1.2rem;
+    margin:8px 0 14px;
+  }
+  .good{color:#bbf7d0}
+  .bad{color:#fecaca}
+  .bar{
+    width:100%;
+    height:18px;
+    background:rgba(255,255,255,.12);
+    border-radius:999px;
+    overflow:hidden;
+    margin:10px 0 18px;
+  }
+  .fill{
+    height:100%;
+    width:100%;
+    background:linear-gradient(90deg, #22c55e, #eab308, #ef4444);
+    transition:width 1s linear;
+  }
+  .result{
+    text-align:center;
+    padding:20px 10px 6px;
+  }
+  .small{
+    color:var(--muted);
+    font-size:.95rem;
+  }
+  @media (max-width: 720px){
+    .hud{grid-template-columns:repeat(2, 1fr)}
+    .option{min-width:130px}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>🌍 World Capital Game</h1>
+
+    <div class="topbar">
+      <select id="mode">
+        <option value="mc">Multiple Choice</option>
+        <option value="typing">Typing</option>
+        <option value="mixed">Mixed</option>
+      </select>
+
+      <select id="timerSelect">
+        <option value="15">15 Second Timer</option>
+        <option value="10" selected>10 Second Timer</option>
+        <option value="7">7 Second Timer</option>
+      </select>
+
+      <button class="primary" onclick="startGame()">Start Game</button>
+    </div>
+
+    <div class="hud">
+      <div class="card"><div class="label">Score</div><div class="value" id="score">0</div></div>
+      <div class="card"><div class="label">Right</div><div class="value" id="right">0</div></div>
+      <div class="card"><div class="label">Wrong</div><div class="value" id="wrong">0</div></div>
+      <div class="card"><div class="label">Timer</div><div class="value" id="timeValue">10</div></div>
+    </div>
+
+    <div class="bar"><div class="fill" id="timerFill"></div></div>
+
+    <div id="game"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+<script>
+const data = [
+  {country:"France", capital:"Paris"},
+  {country:"Germany", capital:"Berlin"},
+  {country:"Italy", capital:"Rome"},
+  {country:"Spain", capital:"Madrid"},
+  {country:"Japan", capital:"Tokyo"},
+  {country:"Canada", capital:"Ottawa"},
+  {country:"Brazil", capital:"Brasilia"},
+  {country:"Australia", capital:"Canberra"},
+  {country:"India", capital:"New Delhi"},
+  {country:"Argentina", capital:"Buenos Aires"},
+  {country:"Egypt", capital:"Cairo"},
+  {country:"Kenya", capital:"Nairobi"},
+  {country:"Mexico", capital:"Mexico City"},
+  {country:"Jamaica", capital:"Kingston"},
+  {country:"China", capital:"Beijing"},
+  {country:"Portugal", capital:"Lisbon"},
+  {country:"Greece", capital:"Athens"},
+  {country:"Norway", capital:"Oslo"},
+  {country:"Sweden", capital:"Stockholm"},
+  {country:"Cuba", capital:"Havana"}
+];
+
+let deck = [];
+let current = 0;
+let score = 0;
+let right = 0;
+let wrong = 0;
+let selectedMode = "mc";
+let timerSeconds = 10;
+let timeLeft = 10;
+let timer = null;
+let locked = false;
+
+function shuffle(arr){
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function startGame(){
+  selectedMode = document.getElementById("mode").value;
+  timerSeconds = Number(document.getElementById("timerSelect").value);
+  deck = shuffle(data);
+  current = 0;
+  score = 0;
+  right = 0;
+  wrong = 0;
+  locked = false;
+  updateHUD();
+  setFeedback("", "");
+  nextQuestion();
+}
+
+function updateHUD(){
+  document.getElementById("score").textContent = score;
+  document.getElementById("right").textContent = right;
+  document.getElementById("wrong").textContent = wrong;
+  document.getElementById("timeValue").textContent = timeLeft;
+}
+
+function setFeedback(msg, cls){
+  const el = document.getElementById("feedback");
+  el.className = "feedback " + (cls || "");
+  el.textContent = msg;
+}
+
+function currentMode(){
+  if(selectedMode === "mixed"){
+    return Math.random() < 0.5 ? "mc" : "typing";
+  }
+  return selectedMode;
+}
+
+function startTimer(){
+  clearInterval(timer);
+  timeLeft = timerSeconds;
+  updateHUD();
+  const fill = document.getElementById("timerFill");
+  fill.style.transition = "none";
+  fill.style.width = "100%";
+  void fill.offsetWidth;
+  fill.style.transition = "width 1s linear";
+
+  timer = setInterval(() => {
+    timeLeft--;
+    updateHUD();
+    fill.style.width = (timeLeft / timerSeconds * 100) + "%";
+
+    if(timeLeft <= 0){
+      clearInterval(timer);
+      if(!locked){
+        handleWrong("Time's up! ");
+      }
+    }
+  }, 1000);
+}
+
+function nextQuestion(){
+  locked = false;
+  setFeedback("", "");
+  if(current >= deck.length){
+    clearInterval(timer);
+    document.getElementById("game").innerHTML = `
+      <div class="result">
+        <div class="question">Game Over</div>
+        <p class="small">Final Score</p>
+        <div style="font-size:3rem;font-weight:800;margin-bottom:10px;">${score}</div>
+        <p>✅ Right: <strong>${right}</strong> &nbsp;&nbsp; ❌ Wrong: <strong>${wrong}</strong></p>
+        <button class="primary" onclick="startGame()">Play Again</button>
+      </div>
+    `;
+    document.getElementById("timeValue").textContent = "0";
+    document.getElementById("timerFill").style.width = "0%";
+    return;
+  }
+
+  const item = deck[current];
+  const mode = currentMode();
+  const game = document.getElementById("game");
+
+  if(mode === "typing"){
+    game.innerHTML = `
+      <div class="questionBox">
+        <div class="prompt">Type the capital of:</div>
+        <div class="question">${item.country}</div>
+        <div class="typing">
+          <input id="answerInput" placeholder="Type capital here" autocomplete="off" />
+          <button class="primary" onclick="submitTyping()">Submit</button>
+        </div>
+      </div>
+    `;
+    setTimeout(() => {
+      const input = document.getElementById("answerInput");
+      if(input){
+        input.focus();
+        input.addEventListener("keydown", (e) => {
+          if(e.key === "Enter") submitTyping();
+        });
+      }
+    }, 20);
+  } else {
+    const wrongChoices = shuffle(data.filter(d => d.capital !== item.capital)).slice(0, 3).map(d => d.capital);
+    const options = shuffle([item.capital, ...wrongChoices]);
+    game.innerHTML = `
+      <div class="questionBox">
+        <div class="prompt">Choose the capital of:</div>
+        <div class="question">${item.country}</div>
+        <div class="answers">
+          ${options.map(opt => `<button class="option" onclick="submitMC('${opt.replace(/'/g, "\\'")}')">${opt}</button>`).join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  startTimer();
+}
+
+function submitTyping(){
+  if(locked) return;
+  const item = deck[current];
+  const val = (document.getElementById("answerInput")?.value || "").trim().toLowerCase();
+  if(val === item.capital.toLowerCase()){
+    handleRight("✅ Correct!");
+  } else {
+    handleWrong(`❌ Wrong. Correct answer: ${item.capital}`);
+  }
+}
+
+function submitMC(ans){
+  if(locked) return;
+  const item = deck[current];
+  if(ans === item.capital){
+    handleRight("✅ Correct!");
+  } else {
+    handleWrong(`❌ Wrong. Correct answer: ${item.capital}`);
+  }
+}
+
+function handleRight(msg){
+  locked = true;
+  clearInterval(timer);
+  score += 10;
+  right += 1;
+  updateHUD();
+  setFeedback(msg, "good");
+  current++;
+  setTimeout(nextQuestion, 900);
+}
+
+function handleWrong(msg){
+  locked = true;
+  clearInterval(timer);
+  wrong += 1;
+  updateHUD();
+  setFeedback(msg, "bad");
+  current++;
+  setTimeout(nextQuestion, 1300);
+}
+</script>
+</body>
+</html>
